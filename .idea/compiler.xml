@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="tripMS" />
+        <module name="taskMS" />
+        <module name="driverMS" />
+        <module name="ServiceRegistry" />
+        <module name="APIGateway" />
+        <module name="stopMS" />
+        <module name="vehicleMS" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="APIGateway" options="-parameters" />
+      <module name="ServiceRegistry" options="-parameters" />
+      <module name="driverMS" options="-parameters" />
+      <module name="stopMS" options="-parameters" />
+      <module name="taskMS" options="-parameters" />
+      <module name="tripMS" options="-parameters" />
+      <module name="vehicleMS" options="-parameters" />
+    </option>
+  </component>
+</project>

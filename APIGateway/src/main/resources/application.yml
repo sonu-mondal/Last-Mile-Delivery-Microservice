@@ -1,0 +1,121 @@
+server:
+  port: 7600
+
+
+
+spring:
+  application:
+    name: API-GATEWAY
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+      routes:
+
+        - id: DRIVER-SERVICE
+          uri: lb://DRIVER-SERVICE
+          predicates:
+            - Path=/drivers/**
+
+        - id: TRIP-SERVICE
+          uri: lb://TRIP-SERVICE
+          predicates:
+            - Path=/trips/**
+
+        - id: TASK-SERVICE
+          uri: lb://TASK-SERVICE
+          predicates:
+            - Path=/tasks/**
+
+        - id: VEHICLE-SERVICE
+          uri: lb://VEHICLE-SERVICE
+          predicates:
+            - Path=/vehicles/**
+
+        - id: STOP-SERVICE
+          uri: lb://STOP-SERVICE
+          predicates:
+            - Path=/stops/**
+
+        # ============ SWAGGER DOC FORWARDERS (WebFlux Format) ============
+
+        - id: trip-docs
+          uri: lb://TRIP-SERVICE
+          predicates:
+            - Path=/swagger-docs/trip
+          filters:
+            - name: RewritePath
+              args:
+                regexp: /swagger-docs/trip
+                replacement: /v3/api-docs
+
+        - id: driver-docs
+          uri: lb://DRIVER-SERVICE
+          predicates:
+            - Path=/swagger-docs/driver
+          filters:
+            - name: RewritePath
+              args:
+                regexp: /swagger-docs/driver
+                replacement: /v3/api-docs
+
+        - id: task-docs
+          uri: lb://TASK-SERVICE
+          predicates:
+            - Path=/swagger-docs/task
+          filters:
+            - name: RewritePath
+              args:
+                regexp: /swagger-docs/task
+                replacement: /v3/api-docs
+
+        - id: vehicle-docs
+          uri: lb://VEHICLE-SERVICE
+          predicates:
+            - Path=/swagger-docs/vehicle
+          filters:
+            - name: RewritePath
+              args:
+                regexp: /swagger-docs/vehicle
+                replacement: /v3/api-docs
+
+        - id: stop-docs
+          uri: lb://STOP-SERVICE
+          predicates:
+            - Path=/swagger-docs/stop
+          filters:
+            - name: RewritePath
+              args:
+                regexp: /swagger-docs/stop
+                replacement: /v3/api-docs
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: Trip Service
+        url: /swagger-docs/trip
+      - name: Driver Service
+        url: /swagger-docs/driver
+      - name: Task Service
+        url: /swagger-docs/task
+      - name: Vehicle Service
+        url: /swagger-docs/vehicle
+      - name: Stop Service
+        url: /swagger-docs/stop
+
+eureka:
+  instance:
+    prefer-ip-address: true
+
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+
+      #http://localhost:8761/eureka/

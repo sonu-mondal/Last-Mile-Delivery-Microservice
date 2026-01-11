@@ -1,0 +1,9 @@
+eureka:
+  instance:
+    prefer-ip-address: true # used so that the instance uses its IP address
+  client:
+    fetch-registry: true # used so that this service fetches registry information from Eureka
+    register-with-eureka: true # used so that this service registers itself with Eureka
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+# URL of the Eureka server
