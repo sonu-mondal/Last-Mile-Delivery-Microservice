@@ -1,0 +1,233 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      eureka-server-condition: ${{ steps.check.outputs.eureka-server-condition }}
+      api-gateway-condition: ${{ steps.check.outputs.api-gateway-condition }}
+      vehicle-service-condition: ${{ steps.check.outputs.vehicle-service-condition }}
+      trip-service-condition: ${{ steps.check.outputs.trip-service-condition }}
+      task-service-condition: ${{ steps.check.outputs.task-service-condition }}
+      driver-service-condition: ${{ steps.check.outputs.driver-service-condition }}
+      stop-service-condition: ${{ steps.check.outputs.stop-service-condition }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changes files
+        id: diff
+        run: |
+          echo "Comparing ${{ github.event.before}} -> ${{ github.sha }}"
+          git fetch origin ${{ github.event.before }} --depth=1 || true
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }} > files.txt
+          echo "Changes files:"
+          cat files.txt
+
+      - name: Evaluate service changes
+        id: check
+        run: |
+          if grep -q "^eureka-server/" files.txt; then
+            echo "eureka-server-condition=true" >> $GITHUB_OUTPUT
+          else
+            echo "eureka-server-condition=false" >> $GITHUB_OUTPUT
+          fi
+
+          if grep -q "^api-gateway/" files.txt; then
+            echo "api-gateway-condition=true" >> $GITHUB_OUTPUT
+          else
+            echo "api-gateway-condition=false" >> $GITHUB_OUTPUT
+          fi
+
+          if grep -q "^vehicle-service/" files.txt; then
+            echo "vehicle-service-condition=true" >> $GITHUB_OUTPUT
+          else
+            echo "vehicle-service-condition=false" >> $GITHUB_OUTPUT
+          fi
+
+          if grep -q "^trip-service/" files.txt; then
+            echo "trip-service-condition=true" >> $GITHUB_OUTPUT
+          else
+            echo "trip-service-condition=false" >> $GITHUB_OUTPUT
+          fi
+
+          if grep -q "^task-service/" files.txt; then
+            echo "task-service-condition=true" >> $GITHUB_OUTPUT
+          else
+            echo "task-service-condition=false" >> $GITHUB_OUTPUT
+          fi
+
+          if grep -q "^driver-service/" files.txt; then
+            echo "driver-service-condition=true" >> $GITHUB_OUTPUT
+          else
+            echo "driver-service-condition=false" >> $GITHUB_OUTPUT
+          fi
+
+          if grep -q "^stop-service/" files.txt; then
+            echo "stop-service-condition=true" >> $GITHUB_OUTPUT
+          else
+            echo "stop-service-condition=false" >> $GITHUB_OUTPUT
+          fi
+
+
+
+  build-eureka-server:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.eureka-server-condition == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+
+      - name: Build JAR for eureka-server
+        run: mvn -f eureka-server/pom.xml clean package -DskipTests
+
+
+      - name: Stop old containers and rebuild eureka-server
+        run: |
+          docker compose down
+          docker compose up -d --build eureka-server
+
+
+  build-api-gateway:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.api-gateway-condition == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+
+      - name: Build JAR for api-gateway
+        run: mvn -f api-gateway/pom.xml clean package -DskipTests
+
+
+      - name: Stop old containers and rebuild api-gateway
+        run: |
+          docker compose down
+          docker compose up -d --build api-gateway
+
+
+  build-vehicle-service:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.vehicle-service-condition == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+
+      - name: Build JAR for vehicle-service
+        run: mvn -f vehicle-service/pom.xml clean package -DskipTests
+
+
+      - name: Stop old containers and rebuild vehicle-service
+        run: |
+          docker compose down
+          docker compose up -d --build vehicle-service
+
+
+  build-trip-service:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.trip-service-condition == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+
+      - name: Build JAR for trip-service
+        run: mvn -f trip-service/pom.xml clean package -DskipTests
+
+
+      - name: Stop old containers and rebuild trip-service
+        run: |
+          docker compose down
+          docker compose up -d --build trip-service
+
+
+  build-task-service:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.task-service-condition == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+
+      - name: Build JAR for task-service
+        run: mvn -f task-service/pom.xml clean package -DskipTests
+
+
+      - name: Stop old containers and rebuild task-service
+        run: |
+          docker compose down
+          docker compose up -d --build task-service
+
+
+  build-driver-service:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.driver-service-condition == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+
+      - name: Build JAR for driver-service
+        run: mvn -f driver-service/pom.xml clean package -DskipTests
+
+
+      - name: Stop old containers and rebuild driver-service
+        run: |
+          docker compose down
+          docker compose up -d --build driver-service
+
+
+  build-stop-service:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.stop-service-condition == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+
+      - name: Build JAR for stop-service
+        run: mvn -f stop-service/pom.xml clean package -DskipTests
+
+
+      - name: Stop old containers and rebuild stop-service
+        run: |
+          docker compose down
+          docker compose up -d --build stop-service
