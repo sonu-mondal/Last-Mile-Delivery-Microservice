@@ -34,7 +34,7 @@ public class StopController {
     public ResponseEntity<List<Stop>> getStopsByTripId(@PathVariable("tripId") int tripId) throws ResourceNotFoundException {
         logger.info("Fetching stops for trip with id: {}", tripId);
         List<Stop> stops = stopServiceImpl.findByTripId(tripId);
-        logger.info("Total stops found for trip {}: {}", tripId, stops.size());
+        //logger.info("Total stops found for trip {}: {}", tripId, stops.size());
         return new ResponseEntity<>(stops, HttpStatus.OK);
     }
 
