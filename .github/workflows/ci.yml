@@ -18,13 +18,11 @@ jobs:
       trip_ms_condition: ${{ steps.check.outputs.trip_ms_condition }}
       vehicle_ms_condition: ${{ steps.check.outputs.vehicle_ms_condition }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Get changed files
-        id: diff
         run: |
           git diff --name-only ${{ github.event.before }} ${{ github.sha }} > files.txt
           echo "Changed files:"
@@ -33,9 +31,18 @@ jobs:
       - name: Evaluate service changes
         id: check
         run: |
-          for service in ServiceRegistry APIGateway driverMS stopMS taskMS tripMS vehicleMS; do
-            key=$(echo "$service" | sed 's/[A-Z]/_\L&/g' | sed 's/^_//')
-            if grep -q "^$service/" files.txt; then
+          declare -A map
+          map[ServiceRegistry]=service_registry
+          map[APIGateway]=api_gateway
+          map[driverMS]=driver_ms
+          map[stopMS]=stop_ms
+          map[taskMS]=task_ms
+          map[tripMS]=trip_ms
+          map[vehicleMS]=vehicle_ms
+
+          for folder in "${!map[@]}"; do
+            key="${map[$folder]}"
+            if grep -q "^$folder/" files.txt; then
               echo "${key}_condition=true" >> $GITHUB_OUTPUT
             else
               echo "${key}_condition=false" >> $GITHUB_OUTPUT
