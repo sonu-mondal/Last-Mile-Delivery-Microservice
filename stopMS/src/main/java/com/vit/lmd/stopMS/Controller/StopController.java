@@ -58,6 +58,7 @@ public class StopController {
        logger.info("Updating stop with id: {}", stopId);
         Stop updatedStop = stopServiceImpl.updateStops(stopId, stop);
         logger.info("Stop updated successfully: {}", updatedStop);
+        logger.info("Stop updated successfully10: {}", updatedStop);
         return new ResponseEntity<>(updatedStop, HttpStatus.OK);
     }
 
