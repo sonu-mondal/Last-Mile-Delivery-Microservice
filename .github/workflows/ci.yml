@@ -10,13 +10,13 @@ jobs:
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
-      eureka-server-condition: ${{ steps.check.outputs.eureka-server-condition }}
-      api-gateway-condition: ${{ steps.check.outputs.api-gateway-condition }}
-      vehicle-service-condition: ${{ steps.check.outputs.vehicle-service-condition }}
-      trip-service-condition: ${{ steps.check.outputs.trip-service-condition }}
-      task-service-condition: ${{ steps.check.outputs.task-service-condition }}
-      driver-service-condition: ${{ steps.check.outputs.driver-service-condition }}
-      stop-service-condition: ${{ steps.check.outputs.stop-service-condition }}
+      eureka_server_condition: ${{ steps.check.outputs.eureka_server_condition }}
+      api_gateway_condition: ${{ steps.check.outputs.api_gateway_condition }}
+      vehicle_service_condition: ${{ steps.check.outputs.vehicle_service_condition }}
+      trip_service_condition: ${{ steps.check.outputs.trip_service_condition }}
+      task_service_condition: ${{ steps.check.outputs.task_service_condition }}
+      driver_service_condition: ${{ steps.check.outputs.driver_service_condition }}
+      stop_service_condition: ${{ steps.check.outputs.stop_service_condition }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -26,7 +26,7 @@ jobs:
       - name: Get changed files
         id: diff
         run: |
-          git diff --name-only HEAD~1 HEAD > files.txt
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }} > files.txt
           echo "Changed files:"
           cat files.txt
 
@@ -35,15 +35,15 @@ jobs:
         run: |
           for service in eureka-server api-gateway vehicle-service trip-service task-service driver-service stop-service; do
             if grep -q "^$service/" files.txt; then
-              echo "$service-condition=true" >> $GITHUB_OUTPUT
+              echo "${service//-/_}_condition=true" >> $GITHUB_OUTPUT
             else
-              echo "$service-condition=false" >> $GITHUB_OUTPUT
+              echo "${service//-/_}_condition=false" >> $GITHUB_OUTPUT
             fi
           done
 
   build-eureka-server:
     needs: detect-changes
-    if: needs.detect-changes.outputs.eureka-server-condition == 'true'
+    if: needs.detect-changes.outputs.eureka_server_condition == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -53,14 +53,16 @@ jobs:
           java-version: '17'
       - name: Build JAR for eureka-server
         run: mvn -f eureka-server/pom.xml clean package -DskipTests
-      - name: Rebuild eureka-server container
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/eureka-server:latest eureka-server
+      - name: Push Docker image
         run: |
-          docker compose down
-          docker compose up -d --build eureka-server
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          docker push ${{ secrets.DOCKER_USERNAME }}/eureka-server:latest
 
   build-api-gateway:
     needs: detect-changes
-    if: needs.detect-changes.outputs.api-gateway-condition == 'true'
+    if: needs.detect-changes.outputs.api_gateway_condition == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -70,14 +72,16 @@ jobs:
           java-version: '17'
       - name: Build JAR for api-gateway
         run: mvn -f api-gateway/pom.xml clean package -DskipTests
-      - name: Rebuild api-gateway container
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest api-gateway
+      - name: Push Docker image
         run: |
-          docker compose down
-          docker compose up -d --build api-gateway
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          docker push ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest
 
   build-vehicle-service:
     needs: detect-changes
-    if: needs.detect-changes.outputs.vehicle-service-condition == 'true'
+    if: needs.detect-changes.outputs.vehicle_service_condition == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -87,14 +91,16 @@ jobs:
           java-version: '17'
       - name: Build JAR for vehicle-service
         run: mvn -f vehicle-service/pom.xml clean package -DskipTests
-      - name: Rebuild vehicle-service container
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/vehicle-service:latest vehicle-service
+      - name: Push Docker image
         run: |
-          docker compose down
-          docker compose up -d --build vehicle-service
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          docker push ${{ secrets.DOCKER_USERNAME }}/vehicle-service:latest
 
   build-trip-service:
     needs: detect-changes
-    if: needs.detect-changes.outputs.trip-service-condition == 'true'
+    if: needs.detect-changes.outputs.trip_service_condition == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -104,14 +110,16 @@ jobs:
           java-version: '17'
       - name: Build JAR for trip-service
         run: mvn -f trip-service/pom.xml clean package -DskipTests
-      - name: Rebuild trip-service container
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/trip-service:latest trip-service
+      - name: Push Docker image
         run: |
-          docker compose down
-          docker compose up -d --build trip-service
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          docker push ${{ secrets.DOCKER_USERNAME }}/trip-service:latest
 
   build-task-service:
     needs: detect-changes
-    if: needs.detect-changes.outputs.task-service-condition == 'true'
+    if: needs.detect-changes.outputs.task_service_condition == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -121,14 +129,16 @@ jobs:
           java-version: '17'
       - name: Build JAR for task-service
         run: mvn -f task-service/pom.xml clean package -DskipTests
-      - name: Rebuild task-service container
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/task-service:latest task-service
+      - name: Push Docker image
         run: |
-          docker compose down
-          docker compose up -d --build task-service
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          docker push ${{ secrets.DOCKER_USERNAME }}/task-service:latest
 
   build-driver-service:
     needs: detect-changes
-    if: needs.detect-changes.outputs.driver-service-condition == 'true'
+    if: needs.detect-changes.outputs.driver_service_condition == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -138,14 +148,16 @@ jobs:
           java-version: '17'
       - name: Build JAR for driver-service
         run: mvn -f driver-service/pom.xml clean package -DskipTests
-      - name: Rebuild driver-service container
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/driver-service:latest driver-service
+      - name: Push Docker image
         run: |
-          docker compose down
-          docker compose up -d --build driver-service
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          docker push ${{ secrets.DOCKER_USERNAME }}/driver-service:latest
 
   build-stop-service:
     needs: detect-changes
-    if: needs.detect-changes.outputs.stop-service-condition == 'true'
+    if: needs.detect-changes.outputs.stop_service_condition == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -155,7 +167,9 @@ jobs:
           java-version: '17'
       - name: Build JAR for stop-service
         run: mvn -f stop-service/pom.xml clean package -DskipTests
-      - name: Rebuild stop-service container
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/stop-service:latest stop-service
+      - name: Push Docker image
         run: |
-          docker compose down
-          docker compose up -d --build stop-service
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          docker push ${{ secrets.DOCKER_USERNAME }}/stop-service:latest
