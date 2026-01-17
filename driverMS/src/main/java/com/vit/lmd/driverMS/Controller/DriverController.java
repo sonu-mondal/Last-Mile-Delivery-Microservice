@@ -125,6 +125,7 @@ public class DriverController {
         logger.info("Releasing driver with id: {}", driverId);
         Driver releasedDriver = driverServiceImpl.releaseDriver(driverId);
         logger.info("Driver released successfully: {}", releasedDriver);
+        logger.info("Driver released successfully1: {}", releasedDriver);
         return new ResponseEntity<>(releasedDriver, HttpStatus.OK);
     }
 
