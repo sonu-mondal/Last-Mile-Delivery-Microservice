@@ -202,7 +202,7 @@ jobs:
           mkdir -p ~/.kube
           echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
       - name: Deploy ServiceRegistry
-        run: kubectl apply -f k8s/service-registry.yaml
+        run: kubectl apply -f K8s/service-registry.yaml
 
   deploy-api-gateway:
     needs: [build-api-gateway, deploy-service-registry]
@@ -215,4 +215,78 @@ jobs:
           version: 'latest'
       - name: Configure Kubeconfig
         run: |
-          mkdir -
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+      - name: Deploy API Gateway
+        run: kubectl apply -f K8s/api-gateway.yaml
+
+  deploy-driver-ms:
+    needs: [build-driver-ms, deploy-service-registry]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+      - name: Configure Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+      - name: Deploy Driver Service
+        run: kubectl apply -f K8s/driver-service.yaml
+
+  deploy-stop-ms:
+    needs: [build-stop-ms, deploy-service-registry]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+      - name: Configure Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+      - name: Deploy Stop Service
+        run: kubectl apply -f K8s/stop-service.yaml
+
+  deploy-task-ms:
+    needs: [build-task-ms, deploy-service-registry]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+      - name: Configure Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+      - name: Deploy Task Service
+        run: kubectl apply -f K8s/task-service.yaml
+
+  deploy-trip-ms:
+    needs: [build-trip-ms, deploy-service-registry]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+      - name: Configure Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+      - name: Deploy Trip Service
+        run: kubectl apply -f K8s/trip-service.yaml
+
+  deploy-vehicle-ms:
+    needs: [build-vehicle-ms, deploy-service-registry]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+      - name: Configure Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+      - name: Deploy Vehicle Service
+        run: kubectl apply -f K8s/vehicle-service.yaml
+
