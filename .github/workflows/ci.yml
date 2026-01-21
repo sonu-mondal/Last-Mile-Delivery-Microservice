@@ -185,11 +185,14 @@ jobs:
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
           docker push ${{ secrets.DOCKER_USERNAME }}/vehicle-service:latest
 
+
   # -------------------------
   # Deploy Jobs (Eureka first)
   # -------------------------
+
   deploy-service-registry:
     needs: build-service-registry
+    if: needs.detect-changes.outputs.service_registry_condition == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -206,6 +209,7 @@ jobs:
 
   deploy-api-gateway:
     needs: [build-api-gateway, deploy-service-registry]
+    if: needs.detect-changes.outputs.api_gateway_condition == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -222,11 +226,14 @@ jobs:
 
   deploy-driver-ms:
     needs: [build-driver-ms, deploy-service-registry]
+    if: needs.detect-changes.outputs.driver_ms_condition == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
       - name: Configure Kubeconfig
         run: |
           mkdir -p ~/.kube
@@ -236,11 +243,14 @@ jobs:
 
   deploy-stop-ms:
     needs: [build-stop-ms, deploy-service-registry]
+    if: needs.detect-changes.outputs.stop_ms_condition == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
       - name: Configure Kubeconfig
         run: |
           mkdir -p ~/.kube
@@ -250,11 +260,14 @@ jobs:
 
   deploy-task-ms:
     needs: [build-task-ms, deploy-service-registry]
+    if: needs.detect-changes.outputs.task_ms_condition == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
       - name: Configure Kubeconfig
         run: |
           mkdir -p ~/.kube
@@ -264,11 +277,14 @@ jobs:
 
   deploy-trip-ms:
     needs: [build-trip-ms, deploy-service-registry]
+    if: needs.detect-changes.outputs.trip_ms_condition == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
       - name: Configure Kubeconfig
         run: |
           mkdir -p ~/.kube
@@ -278,15 +294,46 @@ jobs:
 
   deploy-vehicle-ms:
     needs: [build-vehicle-ms, deploy-service-registry]
+    if: needs.detect-changes.outputs.vehicle_ms_condition == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Set up kubectl
         uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
       - name: Configure Kubeconfig
         run: |
           mkdir -p ~/.kube
           echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
       - name: Deploy Vehicle Service
         run: kubectl apply -f K8s/vehicle-service.yaml
+
+  # -------------------------
+  # Verification Job
+  # -------------------------
+  verify-deployment:
+    needs:
+      - deploy-service-registry
+      - deploy-api-gateway
+      - deploy-driver-ms
+      - deploy-stop-ms
+      - deploy-task-ms
+      - deploy-trip-ms
+      - deploy-vehicle-ms
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+      - name: Configure Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+      - name: Show cluster status
+        run: |
+          kubectl get deployments
+          kubectl get pods
+          kubectl get services
 
