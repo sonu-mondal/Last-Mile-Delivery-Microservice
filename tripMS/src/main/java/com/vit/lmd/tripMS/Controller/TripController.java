@@ -40,7 +40,6 @@ public class TripController {
         logger.info("Fetching all trips");
         List<Trip> trips = tripServiceImpl.getAllTrips();
         logger.info("Total trips found: {}", trips.size());
-        logger.info("Total trips found1: {}", trips.size());
         return new ResponseEntity<>(trips, HttpStatus.OK);
     }
 

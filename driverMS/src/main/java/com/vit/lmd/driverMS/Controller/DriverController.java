@@ -38,6 +38,7 @@ public class DriverController {
     @GetMapping("/all")
     public ResponseEntity<List<Driver>> getAllDrivers() {
         logger.info("Fetching all drivers");
+        logger.info("Fetching all drivers1");
         List<Driver> drivers = driverServiceImpl.getAllDrivers();
         logger.info("Total drivers found: {}", drivers.size());
         return new ResponseEntity<>(drivers, HttpStatus.OK);

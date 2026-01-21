@@ -95,7 +95,6 @@ public class TaskController {
         logger.info("Deleting all tasks");
         taskServiceImpl.deleteAllTasks();
         logger.info("All tasks deleted successfully");
-        logger.info("All tasks deleted successfully1");
         return new ResponseEntity<>("All tasks deleted successfully", HttpStatus.OK);
     }
 

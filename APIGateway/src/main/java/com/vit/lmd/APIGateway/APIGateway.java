@@ -8,6 +8,8 @@ public class APIGateway {
 
 	public static void main(String[] args) {
 		SpringApplication.run(APIGateway.class, args);
+//comment
+
 	}
 
 }

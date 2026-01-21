@@ -40,6 +40,7 @@ public class VehicleController {
     @GetMapping("/all")
     public ResponseEntity<List<Vehicle>> getAllVehicles() {
         logger.info("Fetching all vehicless");
+        logger.info("Fetching all vehicless1");
         List<Vehicle> vehicles= vehicleServiceImpl.getAllVehicles();
         logger.info("Total vehicles found: {}", vehicles.size());
         return new ResponseEntity<>(vehicles, HttpStatus.OK);

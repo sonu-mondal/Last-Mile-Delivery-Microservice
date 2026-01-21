@@ -25,6 +25,7 @@ public class StopController {
     @GetMapping("/all")
     public ResponseEntity<List<Stop>> getAllStops() {
         logger.info("Fetching all stops");
+        logger.info("Fetching all stops1");
         List<Stop> stops = stopServiceImpl.findAllStops();
       //  logger.info("Total stops found: {}", stops.size());
         return new ResponseEntity<>(stops, HttpStatus.OK);
