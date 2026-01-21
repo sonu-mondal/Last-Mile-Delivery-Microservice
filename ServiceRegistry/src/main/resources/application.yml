@@ -6,4 +6,4 @@ eureka:
     fetch-registry: false # used so that this service does not fetch registry information from Eureka
 
 server:
-  port: 8761
+  port: 8761 # service registry port number
